@@ -3,6 +3,7 @@ package com.my.weatherapplication;
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,7 +23,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 
-public class WeatherActivity extends Activity {
+public class WeatherActivity extends Activity implements View.OnClickListener {
 
 
     private EditText et_city;
@@ -30,104 +31,48 @@ public class WeatherActivity extends Activity {
     private TextView one_6, two_6, three_6, four_6, one_1, one_2, one_4, one_5, two_1, two_2, two_4, two_5, three_1, three_2, three_4, three_5, four_1, four_2, four_4, four_5;
     private ImageView one_0, two_0, three_0, four_0;
 
-
+    private String url;
     private String cityname;
-    private RequestQueue queue;
 
     private LinearLayout one, two, three, four;
     private RequestQueue requestQueue;
 
-    public WeatherActivity() {
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
-
-        initView();
-
-
-        bt_get.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-                cityname = et_city.getText().toString().trim();
-                if (TextUtils.isEmpty(cityname)) {
-                    Toast.makeText(getApplicationContext(), "输入不能为空", Toast.LENGTH_SHORT).show();
-                } else {
-                    //Volley_get();
-                    Volley_getTwo();
-                }
-
-            }
-
-
-        });
-    }
-
-    private void Volley_getTwo() {
-        String url = "http://op.juhe.cn/onebox/weather/query?cityname=" +
-                cityname + "&key=d7c989b54f6f61db50375f4e67513437";
-
         requestQueue = Volley.newRequestQueue(this);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-
-//                Log.i("TAG", response.toString());
-//
-//                Info info = GSONUtil.fromJson(response.toString(), Info.class);
-//                System.out.println(info);
-
-                Volley_Json(response.toString());
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-        requestQueue.add(jsonObjectRequest);
-
+        initView();
+        bt_get.setOnClickListener(this);
     }
-
 
     private void initView() {
 
 
         et_city = (EditText) findViewById(R.id.et_city);
         bt_get = (Button) findViewById(R.id.bt_get);
-
         one = (LinearLayout) findViewById(R.id.one);
-
         one_0 = (ImageView) one.findViewById(R.id.day_0);
         one_1 = (TextView) one.findViewById(R.id.day_1);
         one_2 = (TextView) one.findViewById(R.id.day_2);
         one_4 = (TextView) one.findViewById(R.id.day_4);
         one_5 = (TextView) one.findViewById(R.id.day_5);
         one_6 = (TextView) one.findViewById(R.id.day_6);
-
         two = (LinearLayout) findViewById(R.id.two);
-
         two_0 = (ImageView) two.findViewById(R.id.day_0);
         two_1 = (TextView) two.findViewById(R.id.day_1);
         two_2 = (TextView) two.findViewById(R.id.day_2);
         two_4 = (TextView) two.findViewById(R.id.day_4);
         two_5 = (TextView) two.findViewById(R.id.day_5);
         two_6 = (TextView) two.findViewById(R.id.day_6);
-
         three = (LinearLayout) findViewById(R.id.three);
-
         three_0 = (ImageView) three.findViewById(R.id.day_0);
         three_1 = (TextView) three.findViewById(R.id.day_1);
         three_2 = (TextView) three.findViewById(R.id.day_2);
         three_4 = (TextView) three.findViewById(R.id.day_4);
         three_5 = (TextView) three.findViewById(R.id.day_5);
         three_6 = (TextView) three.findViewById(R.id.day_6);
-
         four = (LinearLayout) findViewById(R.id.four);
         four_0 = (ImageView) four.findViewById(R.id.day_0);
         four_1 = (TextView) four.findViewById(R.id.day_1);
@@ -164,7 +109,7 @@ public class WeatherActivity extends Activity {
 //        queue.add(stringRequest);
 //    }
 
-    private void Volley_Json(String response) {
+    public void Volley_Json(String response) {
 
         //System.out.println(response);
 
@@ -248,7 +193,18 @@ public class WeatherActivity extends Activity {
     }
 
 
-}
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.bt_get:
+                cityname = et_city.getText().toString().trim();
+                requestQueue.add(new WeatherReqest().weatherSearch(cityname));
+                }
+
+        }
+
+    }
+
 
 
 
