@@ -2,8 +2,10 @@ package com.my.weatherapplication;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,6 +32,8 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     private Button bt_get;
     private TextView one_6, two_6, three_6, four_6, one_1, one_2, one_4, one_5, two_1, two_2, two_4, two_5, three_1, three_2, three_4, three_5, four_1, four_2, four_4, four_5;
     private ImageView one_0, two_0, three_0, four_0;
+    private ViewPager mainViewPager;
+    private View view1;
 
     private String url;
     private String cityname;
@@ -41,15 +45,16 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_weather);
+        setContentView(R.layout.main_container);
         requestQueue = Volley.newRequestQueue(this);
         initView();
         bt_get.setOnClickListener(this);
     }
 
     private void initView() {
-
-
+        LayoutInflater inflater = getLayoutInflater();
+        mainViewPager = (ViewPager) findViewById(R.id.mainViewPager);
+        view1 = inflater.inflate(R.layout.activity_weather,null);
         et_city = (EditText) findViewById(R.id.et_city);
         bt_get = (Button) findViewById(R.id.bt_get);
         one = (LinearLayout) findViewById(R.id.one);
@@ -109,12 +114,42 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
 //        queue.add(stringRequest);
 //    }
 
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.bt_get:
+
+                cityname = et_city.getText().toString().trim();
+                requestQueue.add(weatherSearch(cityname));
+                }
+
+        }
+    public JsonObjectRequest weatherSearch(String city){
+        String WEATHER_URL = "http://op.juhe.cn/onebox/weather/query?cityname=" +
+                city + "&key=d7c989b54f6f61db50375f4e67513437";
+        JsonObjectRequest weatherRequest = new JsonObjectRequest(Request.Method.GET, WEATHER_URL, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Volley_Json(response.toString());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                });
+
+        return weatherRequest;
+    }
+    //setView
     public void Volley_Json(String response) {
 
         //System.out.println(response);
 
         Info info = GSONUtil.fromJson(response, Info.class);
-        System.out.println(info);
+        System.out.println("weather++"+info);
 
 
         one_6.setText(info.getResult().getData().getWeather().get(0).getDate());
@@ -191,17 +226,6 @@ public class WeatherActivity extends Activity implements View.OnClickListener {
         info.getResult().getData().getWeather().clear();
 
     }
-
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.bt_get:
-                cityname = et_city.getText().toString().trim();
-                requestQueue.add(new WeatherReqest().weatherSearch(cityname));
-                }
-
-        }
 
     }
 
